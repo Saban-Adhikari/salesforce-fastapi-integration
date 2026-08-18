@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 from database import get_connection
+from models import Customer
 
 app = FastAPI()
 
@@ -19,10 +19,6 @@ customers = [
     }
 ]
 
-class Customer(BaseModel):
-    name: str
-    email: str
-    phone: str
 
 @app.delete("/customers/{customer_id}")
 def delete_customer(customer_id: int):
