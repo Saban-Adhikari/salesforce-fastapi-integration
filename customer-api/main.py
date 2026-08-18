@@ -4,22 +4,6 @@ from models import Customer
 
 app = FastAPI()
 
-customers = [
-    {
-        "id": 1,
-        "name": "John Smith"
-    },
-    {
-        "id": 2,
-        "name": "Sarah Jones"
-    },
-    {
-        "id": 3,
-        "name": "Bob Williams"
-    }
-]
-
-
 @app.delete("/customers/{customer_id}")
 def delete_customer(customer_id: int):
     connection = get_connection()
