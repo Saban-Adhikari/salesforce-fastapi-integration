@@ -1,133 +1,47 @@
 from fastapi import FastAPI, HTTPException
 from database import get_connection
 from models import Customer
+from customer_service import (
+    get_all_customers, 
+    get_customer_by_id, 
+    create_customer,
+    update_customer,
+    delete_customer
+)
 
 app = FastAPI()
 
 @app.delete("/customers/{customer_id}")
-def delete_customer(customer_id: int):
-    connection = get_connection()
-    cursor = connection.cursor()
+def delete_customer_endpoint(customer_id: int):
+    deleted = delete_customer(customer_id)
 
-    cursor.execute(
-        "SELECT id FROM customers WHERE id = ?",
-        (customer_id,)
-    )
-
-    existing_customer = cursor.fetchone()
-
-    if existing_customer is None:
-        connection.close()
+    if not deleted:
         raise HTTPException(status_code=404, detail="Customer not found")
-
-    cursor.execute(
-        "DELETE FROM customers WHERE id = ?",
-        (customer_id,)
-    )
-
-    connection.commit()
-
-    connection.close()
 
     return {
         "message": "Customer deleted"
     }
 
 @app.patch("/customers/{customer_id}")
-def update_customer(customer_id: int, customer: Customer):
-    connection = get_connection()
-    cursor = connection.cursor()
+def update_customer_endpoint(customer_id: int, customer: Customer):
+    updated_customer = update_customer(customer_id, customer)
 
-    cursor.execute(
-        "SELECT id FROM customers WHERE id = ?",
-        (customer_id,)
-    )
-
-    existing_customer = cursor.fetchone()
-
-    if existing_customer is None:
-        connection.close()
+    if updated_customer is None:
         raise HTTPException(status_code=404, detail="Customer not found")
 
-    cursor.execute(
-        """
-        UPDATE customers
-        SET name = ?, email = ?, phone = ?
-        WHERE id = ?
-        """,
-        (
-            customer.name,
-            customer.email,
-            customer.phone,
-            customer_id
-        )
-    )
-
-    connection.commit()
-
-    connection.close()
-
-    return {
-        "id": customer_id,
-        "name": customer.name,
-        "email": customer.email,
-        "phone": customer.phone
-    }
+    return updated_customer
 
 @app.post("/customers")
-def create_customer(customer: Customer):
-    connection = get_connection()
-    cursor = connection.cursor()
-
-    cursor.execute(
-        """
-        INSERT INTO customers (name, email, phone) 
-        VALUES (?, ?, ?)
-        """,
-        (customer.name, customer.email, customer.phone)
-    )
-
-    connection.commit()
-
-    customer_id = cursor.lastrowid
-
-    connection.close()
-
-    return {
-        "id": customer_id,
-        "name": customer.name,
-        "email": customer.email,
-        "phone": customer.phone
-    }
+def create_customer_endpoint(customer: Customer):
+    return create_customer(customer)
 
 @app.get("/customers")
 def get_customers():
-    connection = get_connection()
-
-    cursor = connection.cursor()
-
-    cursor.execute("SELECT id, name, email, phone FROM customers")
-
-    customers = cursor.fetchall()
-
-    connection.close()
-
-    return[dict(customer) for customer in customers]
+    return get_all_customers()
 
 @app.get("/customers/{customer_id}")
 def get_customer(customer_id: int):
-    connection = get_connection()
-
-    cursor = connection.cursor()
-
-    cursor.execute(
-        "SELECT id, name from customers where id = ?",
-        (customer_id,)
-    )
-
-    customer = cursor.fetchone()
-
-    connection.close()
+    customer = get_customer_by_id(customer_id)
 
     if customer is None:
         raise HTTPException(status_code=404, detail="Customer not found")
