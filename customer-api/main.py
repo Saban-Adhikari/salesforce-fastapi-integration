@@ -1,5 +1,4 @@
 from fastapi import FastAPI, HTTPException
-from database import get_connection
 from models import Customer
 from customer_service import (
     get_all_customers, 
