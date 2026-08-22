@@ -1,14 +1,23 @@
 name: FastAPI Tests
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - "release/**"
+      - "feature/**"
+
+  pull_request:
+    branches:
+      - main
+      - "release/**"
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -24,4 +33,6 @@ jobs:
 
       - name: Run tests
         working-directory: customer-api
+        env:
+          PYTHONPATH: .
         run: pytest -v
