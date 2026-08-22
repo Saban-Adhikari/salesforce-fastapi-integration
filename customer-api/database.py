@@ -1,7 +1,12 @@
 import sqlite3
 
 
-def get_connection():
-    connection = sqlite3.connect("customers.db")
+DATABASE = "customers.db"
+
+
+def get_connection(database=DATABASE):
+    connection = sqlite3.connect(database)
+
     connection.row_factory = sqlite3.Row
+
     return connection
