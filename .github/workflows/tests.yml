@@ -31,4 +31,6 @@ jobs:
 
       - name: Run tests
         working-directory: customer-api
+        env:
+          PYTHONPATH: .
         run: pytest -v
